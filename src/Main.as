@@ -2,12 +2,16 @@ package
 {
 	import flash.display.Sprite;
 	import flash.events.Event;
+	import screens.TestScreen;
+	import whojooEngine.Game;
+	import whojooEngine.Settings;
+	import whojooEngine.Vector2;
 	
 	/**
 	 * ...
 	 * @author Robin de Gier
 	 */
-	public class Main extends Sprite 
+	public class Main extends Game 
 	{
 		
 		public function Main():void 
@@ -20,6 +24,10 @@ package
 		{
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 			// entry point
+			Settings.getInstance().setPixelPerMeter(30);
+			run(30, new TestScreen());
+			
+			var player:Player = new Player(Vector2.zero(), Vector2.zero());
 		}
 		
 	}
