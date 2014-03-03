@@ -11,6 +11,7 @@ package
 	import whojooEngine.input.InputAction;
 	import whojooEngine.input.Keys;
 	import whojooEngine.physics.Box;
+	import whojooEngine.physics.Circle;
 	import whojooEngine.physics.Wall;
 	import whojooEngine.Vector2;
 	import whojooEngine.Settings;
@@ -19,11 +20,14 @@ package
 	 * ...
 	 * @author Robin de Gier
 	 */
-	public class Player extends Box 
+	public class Player extends Circle 
 	{
 		//Constant movement variables.
 		private const moveVec:Vector2 = new Vector2(1, 0);
 		private const jumpVec:Vector2 = new Vector2(0, -20);
+		
+		//Jump constants.
+		private const AmountOfFreeJumps:Number = 2;
 		
 		//Constant player states.
 		private const InAirMultiplier:Number = 0.65;
@@ -37,7 +41,6 @@ package
 		//Jumps.
 		private var jumpsFromOrbLeft:Number;
 		private var jumpsLeft:Number;
-		private var jumpFromFloor:Boolean;
 		private var orbs:Vector.<Player>;
 		
 		//Movement.
@@ -51,7 +54,6 @@ package
 			moveLeft = new InputAction([ Keys.LEFT, Keys.A ]);
 			moveRight = new InputAction([ Keys.RIGHT, Keys.D ]);
 			
-			jumpFromFloor = true;
 			jumpsFromOrbLeft = 0;
 			jumpsLeft = 5;
 			orbs = new Vector.<Player>();
@@ -61,20 +63,12 @@ package
 		
 		private function jump():Boolean
 		{
-			//Jumping from floor is a free jump.
-			if (jumpFromFloor)
-			{
-				//Jumping can't always happen so the actual jump has to be after these if elses.
-				//However we must skip the following if elses if we're on the floor.
-				//That's the reason of this empty if statement.
-			}
-			//Do we still have starting jumps left?
-			else if (jumpsLeft > 
-				(orbs.length > 0 ? orbs.length - 1 : 0) * SettingsJumper.getInstance().getJumpCountPerOrb() + jumpsFromOrbLeft)
+			//Do we still have free jumps left?
+			if (jumpsLeft > amountOfOrbJumpsLeft())
 			{
 				jumpsLeft--;
 			}
-			//Are we able to air jump?
+			//Do we have orb empowered jumps left?
 			else if (jumpsFromOrbLeft > 0)
 			{
 				//Is the current orb out of jumps?
@@ -102,19 +96,25 @@ package
 			return true;
 		}
 		
+		private function amountOfOrbJumpsLeft():Number
+		{
+			//Do we have any reserve orbs?
+			return (orbs.length > 1 ? orbs.length - 1 : 0) * 
+				SettingsJumper.getInstance().getJumpCountPerOrb() + jumpsFromOrbLeft;
+		}
+		
 		override public function update(elapsedTime:Number):void 
 		{
 			super.update(elapsedTime);
 			
 			//Mechanics.
-			//Set jumpFromFloor on false in case we're on on the floor anymore.
-			jumpFromFloor = false;
 			for (var contact:b2ContactEdge = body.GetContactList(); contact; contact = contact.next)
 			{
 				if (contact.other.GetUserData() is Wall && 
 					(contact.other.GetUserData() as Wall).position.y > position.y)
 				{
-					jumpFromFloor = true;
+					//Get free jumps.
+					jumpsLeft = amountOfOrbJumpsLeft + AmountOfFreeJumps;
 					
 					//We're on the floor so reset the movementMultiplier.
 					movementMultiplier = OnFloorMultiplier;
@@ -159,9 +159,12 @@ package
 			var transformedPosition:Vector2 = Vector2.transform(position,
 				Camera.getInstance().view);
 			
+			var scaledradius:Number = Camera.getInstance().scale * radius;
+			
 			graphics.beginFill(0x000000);
-			graphics.drawRect(transformedPosition.x - halfSize.x, transformedPosition.y - halfSize.y,
-				halfSize.x * 2, halfSize.y * 2);
+			graphics.drawCircle(transformedPosition.x, 
+				transformedPosition.y,
+				scaledradius);
 			graphics.endFill();
 		}
 	}
