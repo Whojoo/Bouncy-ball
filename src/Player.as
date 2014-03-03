@@ -41,7 +41,7 @@ package
 		//Jumps.
 		private var jumpsFromOrbLeft:Number;
 		private var jumpsLeft:Number;
-		private var orbs:Vector.<Player>;
+		private var orbs:Vector.<Orb>;
 		
 		//Movement.
 		private var movementMultiplier:Number;
@@ -56,7 +56,7 @@ package
 			
 			jumpsFromOrbLeft = 0;
 			jumpsLeft = 5;
-			orbs = new Vector.<Player>();
+			orbs = new Vector.<Orb>();
 			
 			movementMultiplier = OnFloorMultiplier;
 		}
@@ -69,20 +69,32 @@ package
 				jumpsLeft--;
 			}
 			//Do we have orb empowered jumps left?
-			else if (jumpsFromOrbLeft > 0)
+			else if (orbs.length > 0)
 			{
-				//Is the current orb out of jumps?
-				if (--jumpsFromOrbLeft <= 0)
+				//Adjust the jumping numbers.
+				jumpsLeft--;
+				jumpsFromOrbLeft--;
+				orbs[0].orbEmpowerUsed();
+				
+				if (jumpsFromOrbLeft <= 0)
 				{
-					jumpsFromOrbLeft = SettingsJumper.getInstance().getJumpCountPerOrb();
-					
-					var temp:Vector.<Player> = orbs;
-					orbs = new Vector.<Player>();
-					
-					//Skip the old orb and copy the others in a new array.
-					for (var i:int = 1; i < temp.length; i++)
+					//Just used last orb.
+					if (orbs.length == 1)
 					{
-						orbs.push(temp[i]);
+						orbs = new Vector.<Orb>();
+					}
+					//Still got some orbs left.
+					else
+					{
+						var temp:Vector.<Orb> = orbs;
+						
+						for (var i:int = 1; i < orbs.length; i++)
+						{
+							temp.push(orbs[i]);
+						}
+						
+						orbs = temp;
+						jumpsFromOrbLeft = SettingsJumper.getInstance().getJumpCountPerOrb();
 					}
 				}
 			}
@@ -103,6 +115,30 @@ package
 				SettingsJumper.getInstance().getJumpCountPerOrb() + jumpsFromOrbLeft;
 		}
 		
+		public function gainOrbEmpower(orb:Orb, alreadyEmpowered:Boolean):void
+		{
+			//jumpsFromOrbLeft might get adjusted so we prepair jumpsLeft for the adjustment.
+			jumpsLeft -= jumpsFromOrbLeft;
+			
+			//Orb only calls this function if it is currently in use or not stored at all.
+			if (alreadyEmpowered && orb == orbs[0])
+			{
+				jumpsFromOrbLeft = SettingsJumper.getInstance().getJumpCountPerOrb();
+			}
+			else
+			{
+				orbs.push(orb);
+				
+				if (orbs.length == 1)
+				{
+					jumpsFromOrbLeft = SettingsJumper.getInstance().getJumpCountPerOrb();
+				}
+			}
+			
+			//jumpsFromOrbLeft might have been adjusted, adjust jumpsLeft.
+			jumpsLeft += jumpsFromOrbLeft;
+		}
+		
 		override public function update(elapsedTime:Number):void 
 		{
 			super.update(elapsedTime);
@@ -114,7 +150,7 @@ package
 					(contact.other.GetUserData() as Wall).position.y > position.y)
 				{
 					//Get free jumps.
-					jumpsLeft = amountOfOrbJumpsLeft + AmountOfFreeJumps;
+					jumpsLeft = amountOfOrbJumpsLeft() + AmountOfFreeJumps;
 					
 					//We're on the floor so reset the movementMultiplier.
 					movementMultiplier = OnFloorMultiplier;
