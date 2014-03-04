@@ -1,12 +1,19 @@
 package  
 {
+	import Box2D.Collision.Shapes.b2PolygonShape;
+	import Box2D.Common.Math.b2Vec2;
+	import Box2D.Dynamics.b2Body;
+	import Box2D.Dynamics.b2BodyDef;
+	import Box2D.Dynamics.b2FixtureDef;
 	import Box2D.Dynamics.Contacts.b2ContactEdge;
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Graphics;
 	import flash.events.WeakFunctionClosure;
+	import screens.GameplayScreen;
 	import whojooEngine.Camera;
 	import whojooEngine.components.PhysicsComponent;
+	import whojooEngine.Settings;
 	import whojooEngine.Vector2;
 	import whojooEngine.WMatrix;
 	
@@ -18,13 +25,16 @@ package
 	{
 		//Doors linked to this key.
 		private var doors:Vector.<Door>;
-		private var texture:BitmapData;
 		
-		public function Key(position:Vector2, doors:Vector.<Door>) 
+		private var texture:BitmapData;
+		private var keyNumber:Number;
+		
+		public function Key(position:Vector2, keyNumber:Number, doors:Vector.<Door>) 
 		{
 			super(position, new Vector2(30, 10));
 			
 			this.doors = doors;
+			
 		}
 		
 		override public function init():void 
@@ -36,6 +46,47 @@ package
 			texture.draw(bitmap, WMatrix.toMatrix(WMatrix.identity()));
 			
 			halfSize = new Vector2(bitmap.width * 0.5, bitmap.height * 0.5);
+			
+			var settings:Settings = Settings.getInstance();
+			
+			//Initialize the body.
+			var bodyDef:b2BodyDef = new b2BodyDef();
+			bodyDef.userData = this;
+			bodyDef.position = Vector2.divide(position,
+				settings.getPixelPerMeter()).as_b2Vec2();
+			bodyDef.type = b2Body.b2_staticBody;
+			
+			body = settings.getActiveWorld().CreateBody(bodyDef);
+			
+			var vertices:Vector.<b2Vec2> = new Vector.<b2Vec2>();
+			vertices.push(Vector2.divide(halfSize.inverse(), settings.getPixelPerMeter()).as_b2Vec2());
+			vertices.push(Vector2.divide(new Vector2(halfSize.x, -halfSize.y), settings.getPixelPerMeter()).as_b2Vec2());
+			vertices.push(Vector2.divide(halfSize.clone(), settings.getPixelPerMeter()).as_b2Vec2());
+			vertices.push(Vector2.divide(new Vector2( -halfSize.x, halfSize.y), settings.getPixelPerMeter()).as_b2Vec2());
+			
+			var shape:b2PolygonShape = new b2PolygonShape();
+			shape.SetAsVector(vertices, vertices.length);
+			
+			var fixture:b2FixtureDef = new b2FixtureDef();
+			fixture.isSensor = true;
+			fixture.shape = shape;
+			
+			body.CreateFixture(fixture);
+		}
+		
+		public function keyLost():void
+		{
+			//Safe check.
+			if (!doors)
+			{
+				return;
+			}
+			
+			//Close all doors.
+			for (var i:int = doors.length - 1; i >= 0; i--)
+			{
+				doors[i].closeDoor();
+			}
 		}
 		
 		override public function update(deltaTime:Number):void 
@@ -47,13 +98,34 @@ package
 				return;
 			}
 			
+			//Check for player collision.
 			for (var contact:b2ContactEdge = body.GetContactList();
 				contact; contact = contact.next)
 			{
 				var player:Player = contact.other.GetUserData() as Player;
 				if (player)
 				{
-					//Message the screen that the player reached this key!
+					var screen:GameplayScreen = Settings.getInstance().getActiveScreen() as GameplayScreen;
+					
+					if (screen)
+					{
+						screen.keyReached(keyNumber);
+					}
+					
+					//Safe check.
+					if (!doors)
+					{
+						break;
+					}
+					
+					//Open all doors.
+					for (var i:int = doors.length - 1; i >= 0; i--)
+					{
+						doors[i].openDoor();
+					}
+					
+					//No need to stay in this loop.
+					break;
 				}
 			}
 		}
