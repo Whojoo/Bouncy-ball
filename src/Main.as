@@ -26,8 +26,6 @@ package
 			// entry point
 			Settings.getInstance().setPixelPerMeter(30);
 			run(30, new TestScreen());
-			
-			var player:Player = new Player(Vector2.zero(), Vector2.zero());
 		}
 		
 	}
