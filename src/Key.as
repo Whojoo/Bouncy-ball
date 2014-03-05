@@ -13,6 +13,8 @@ package
 	import screens.GameplayScreen;
 	import whojooEngine.Camera;
 	import whojooEngine.components.PhysicsComponent;
+	import whojooEngine.messageBoard.Message;
+	import whojooEngine.messageBoard.MessageBoard;
 	import whojooEngine.Settings;
 	import whojooEngine.Vector2;
 	import whojooEngine.WMatrix;
@@ -23,6 +25,8 @@ package
 	 */
 	public class Key extends PhysicsComponent 
 	{
+		public static const Key_Reached:String = "Key Reached";
+		
 		//Doors linked to this key.
 		private var doors:Vector.<Door>;
 		
@@ -135,13 +139,6 @@ package
 				var player:Player = contact.other.GetUserData() as Player;
 				if (player)
 				{
-					var screen:GameplayScreen = Settings.getInstance().getActiveScreen() as GameplayScreen;
-					
-					if (screen)
-					{
-						screen.keyReached(keyNumber);
-					}
-					
 					//Safe check.
 					if (!doors)
 					{
@@ -153,6 +150,16 @@ package
 						//No need to switch doors if we are already active.
 						break;
 					}
+					
+					var screen:GameplayScreen = Settings.getInstance().getActiveScreen() as GameplayScreen;
+					
+					if (screen)
+					{
+						screen.keyReached(keyNumber);
+					}
+					
+					MessageBoard.getInstance().sendMessage(
+						new Message(Key_Reached, this));
 					
 					keyActive = true;
 					
