@@ -46,9 +46,9 @@ package
 		//Movement.
 		private var movementMultiplier:Number;
 		
-		public function Player(position:Vector2, halfSize:Vector2) 
+		public function Player(position:Vector2) 
 		{
-			super(position, halfSize);
+			super(position, new Vector2(15, 15));
 			
 			doJump = new InputAction([ Keys.UP, Keys.SPACE, Keys.W ], true);
 			moveLeft = new InputAction([ Keys.LEFT, Keys.A ]);

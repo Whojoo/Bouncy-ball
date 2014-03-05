@@ -9,15 +9,9 @@ package screens
 	 */
 	public class GameplayScreen extends PlayScreen 
 	{
-		
 		public function GameplayScreen(gravity:Vector2) 
 		{
 			super(gravity);
-			
-		}
-		
-		public function keyReached(keyNumber:Number):void
-		{
 			
 		}
 	}

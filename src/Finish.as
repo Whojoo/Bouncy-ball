@@ -242,6 +242,13 @@ package
 			graphics.endFill();
 		}
 		
+		override public function unload():void 
+		{
+			super.unload();
+			texture.dispose();
+			MessageBoard.getInstance().removeFromBoard(this);
+		}
+		
 		private function checkIfPlayerPassedDistanceLimit():Boolean
 		{
 			const fromPercentageToDecimalFactor:Number = 0.1;

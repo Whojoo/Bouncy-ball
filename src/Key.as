@@ -26,6 +26,7 @@ package
 	public class Key extends PhysicsComponent 
 	{
 		public static const Key_Reached:String = "Key Reached";
+		public static const Key_Lost:String = "Key Lost";
 		
 		//Doors linked to this key.
 		private var doors:Vector.<Door>;
@@ -109,6 +110,7 @@ package
 			}
 			
 			keyActive = false;
+			MessageBoard.getInstance().sendMessage(new Message(Key_Lost, this));
 			
 			//Safe check.
 			if (!doors)
@@ -139,29 +141,22 @@ package
 				var player:Player = contact.other.GetUserData() as Player;
 				if (player)
 				{
-					//Safe check.
-					if (!doors)
-					{
-						break;
-					}
-					
 					if (keyActive)
 					{
 						//No need to switch doors if we are already active.
 						break;
 					}
 					
-					var screen:GameplayScreen = Settings.getInstance().getActiveScreen() as GameplayScreen;
-					
-					if (screen)
-					{
-						screen.keyReached(keyNumber);
-					}
-					
 					MessageBoard.getInstance().sendMessage(
 						new Message(Key_Reached, this));
 					
 					keyActive = true;
+					
+					//Safe check.
+					if (!doors)
+					{
+						break;
+					}
 					
 					//Open all doors.
 					for (var i:int = doors.length - 1; i >= 0; i--)
@@ -195,6 +190,12 @@ package
 			graphics.drawRect(transformedPos.x, transformedPos.y,
 				transformedHS.x, transformedHS.y);
 			graphics.endFill();
+		}
+		
+		override public function unload():void 
+		{
+			super.unload();
+			texture.dispose();
 		}
 	}
 
