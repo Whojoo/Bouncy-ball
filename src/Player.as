@@ -103,8 +103,6 @@ package
 				return false;
 			}
 			
-			//movementMultiplier = InAirMultiplier;
-			
 			return true;
 		}
 		
@@ -143,11 +141,14 @@ package
 		{
 			super.update(elapsedTime);
 			
+			movementMultiplier = InAirMultiplier;
+			
 			//Mechanics.
 			for (var contact:b2ContactEdge = body.GetContactList(); contact; contact = contact.next)
 			{
-				if (contact.other.GetUserData() is Wall && 
-					(contact.other.GetUserData() as Wall).position.y > position.y)
+				var floor:Wall = contact.other.GetUserData() as Wall;
+				if (floor && floor.position.y - floor.halfSize.y > 
+					position.y + halfSize.y)
 				{
 					//Get free jumps.
 					jumpsLeft = amountOfOrbJumpsLeft() + AmountOfFreeJumps;
