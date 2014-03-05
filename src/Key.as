@@ -28,18 +28,27 @@ package
 		
 		private var texture:BitmapData;
 		private var keyNumber:Number;
+		private var keyActive:Boolean;
 		
-		public function Key(position:Vector2, keyNumber:Number, doors:Vector.<Door>) 
+		public function Key(position:Vector2, keyNumber:Number, doors:Vector.<Door> = null) 
 		{
 			super(position, new Vector2(30, 10));
 			
-			this.doors = doors;
-			
+			if (doors)
+			{
+				this.doors = doors;
+			}
+			else
+			{
+				this.doors = new Vector.<Door>();
+			}
 		}
 		
 		override public function init():void 
 		{
 			super.init();
+			
+			keyActive = false;
 			
 			var bitmap:Bitmap = Textures.getInstance().getKeyTexture();
 			texture = new BitmapData(bitmap.width, bitmap.height, true);
@@ -74,8 +83,29 @@ package
 			body.CreateFixture(fixture);
 		}
 		
+		public function addDoor(door:Door):void
+		{
+			doors.push(door);
+		}
+		
+		public function addDoors(doors:Vector.<Door>):void
+		{
+			for each (var door:Door in doors)
+			{
+				this.doors.push(door);
+			}
+		}
+		
 		public function keyLost():void
 		{
+			if (!keyActive)
+			{
+				//No need to do something if we weren't active to begin with.
+				return;
+			}
+			
+			keyActive = false;
+			
 			//Safe check.
 			if (!doors)
 			{
@@ -85,7 +115,7 @@ package
 			//Close all doors.
 			for (var i:int = doors.length - 1; i >= 0; i--)
 			{
-				doors[i].closeDoor();
+				doors[i].switchDoor();
 			}
 		}
 		
@@ -118,10 +148,18 @@ package
 						break;
 					}
 					
+					if (keyActive)
+					{
+						//No need to switch doors if we are already active.
+						break;
+					}
+					
+					keyActive = true;
+					
 					//Open all doors.
 					for (var i:int = doors.length - 1; i >= 0; i--)
 					{
-						doors[i].openDoor();
+						doors[i].switchDoor();
 					}
 					
 					//No need to stay in this loop.

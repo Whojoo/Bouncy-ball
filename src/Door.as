@@ -23,20 +23,11 @@ package
 			super(topLeft, halfSize);
 		}
 		
-		public function openDoor():void
+		public function switchDoor():void
 		{
-			supressDraw = true;
-			
-			//Set the body to a sensor.
-			body.GetFixtureList().SetSensor(true);
-		}
-		
-		public function closeDoor():void
-		{
-			supressDraw = false;
-			
-			//Set the body to collidable.
-			body.GetFixtureList().SetSensor(false);
+			//Switch the values to their opposite.
+			supressDraw = !supressDraw;
+			body.GetFixtureList().SetSensor(!body.GetFixtureList().IsSensor());
 		}
 		
 		override public function update(deltaTime:Number):void 
