@@ -23,8 +23,8 @@ package
 	public class Player extends Circle 
 	{
 		//Constant movement variables.
-		private const moveVec:Vector2 = new Vector2(1, 0);
-		private const jumpVec:Vector2 = new Vector2(0, -20);
+		private const moveVec:Vector2 = new Vector2(0.025, 0);
+		private const jumpVec:Vector2 = new Vector2(0, -0.3);
 		
 		//Jump constants.
 		private const AmountOfFreeJumps:Number = 2;
@@ -167,8 +167,10 @@ package
 			{
 				//Jump mechanics + check if we can jump.
 				if (jump())
+				{
 					movementVector.incrementBy(Vector2.multiply(
 						jumpVec, Settings.getInstance().getPixelPerMeter()));
+				}
 			}
 			
 			if (moveRight.check(Settings.getInstance().getGame().input))
