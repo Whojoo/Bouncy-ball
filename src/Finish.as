@@ -89,12 +89,6 @@ package
 			
 			var toReturn:Vector.<Key> = new Vector.<Key>();
 			
-			if (positions.length == 1)
-			{
-				toReturn.push(new Key(positions[0], 1));
-				return toReturn;
-			}
-			
 			//Order with recursion.
 			var positionsInOrder:Vector.<Vector2> = orderPositions(positions);
 			
@@ -191,8 +185,7 @@ package
 			}
 			
 			//Can we punish the player and do we have to punish the player?
-			if (!noDistancePunishment && 
-				checkIfPlayerPassedDistanceLimit() && currentKey != keys.length - 1)
+			if (!noDistancePunishment && checkIfPlayerPassedDistanceLimit())
 			{
 				if (currentKey > -1)
 				{
@@ -240,6 +233,16 @@ package
 			graphics.drawRect(transformedPos.x, transformedPos.y,
 				transformedHS.x, transformedHS.y);
 			graphics.endFill();
+			
+			if (!(currentKey >= 0 && currentKey < keys.length))
+			{
+				return;
+			}
+			
+			graphics.beginFill(0xff0000, 1);
+			graphics.drawCircle(transformedPos.x + halfSize.x, transformedPos.y + halfSize.y,
+				Vector2.subtract(keys[currentKey].position, position).length() * DistancePunishmentMargeInPercentage * 0.01);
+			graphics.endFill();
 		}
 		
 		override public function unload():void 
@@ -251,7 +254,7 @@ package
 		
 		private function checkIfPlayerPassedDistanceLimit():Boolean
 		{
-			const fromPercentageToDecimalFactor:Number = 0.1;
+			const fromPercentageToDecimalFactor:Number = 0.01;
 			
 			//We want the marge squared since it's quicker to use lengthSQ on vector2.
 			//That means that our converter factor has to squared as well.
