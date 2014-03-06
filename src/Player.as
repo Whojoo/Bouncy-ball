@@ -27,7 +27,7 @@ package
 		private const jumpVec:Vector2 = new Vector2(0, -0.3);
 		
 		//Jump constants.
-		private const AmountOfFreeJumps:Number = 2;
+		private const AmountOfFreeJumps:Number = 1;
 		
 		//Constant player states.
 		private const InAirMultiplier:Number = 0.65;
