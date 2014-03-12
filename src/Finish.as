@@ -79,10 +79,7 @@ package
 		public function createKeys(positions:Vector.<Vector2>):Vector.<Key>
 		{
 			//Safe check.
-			//XOR operation
-			var firstCheck:Boolean = !positions && positions.length == 0;
-			var secondCheck:Boolean = !positions || positions.length == 0;
-			if (firstCheck && secondCheck)
+			if (!positions ? true : positions.length == 0)
 			{
 				return null;
 			}
@@ -90,12 +87,12 @@ package
 			var toReturn:Vector.<Key> = new Vector.<Key>();
 			
 			//Order with recursion.
-			var positionsInOrder:Vector.<Vector2> = orderPositions(positions);
+			//var positionsInOrder:Vector.<Vector2> = orderPositions(positions);
 			
 			//Now create some keys.
-			for (var i:int = positionsInOrder.length - 1; i >= 0; i--)
+			for (var i:int = positions.length - 1; i >= 0; i--)
 			{
-				toReturn.push(new Key(positionsInOrder[i], i + 1));
+				toReturn.push(new Key(positions[i], i + 1));
 			}
 			
 			//Set local variables.
