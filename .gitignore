@@ -3,6 +3,10 @@ bin/
 bin-debug/
 bin-release/
 
+#Sublime
+.sublime-workspace
+.sublime-project
+
 # Other files and folders
 .settings/
 obj/
