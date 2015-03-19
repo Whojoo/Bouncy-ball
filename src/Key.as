@@ -56,7 +56,7 @@ package
 			keyActive = false;
 			
 			var bitmap:Bitmap = Textures.getInstance().getKeyTexture();
-			texture = new BitmapData(bitmap.width, bitmap.height, true);
+			texture = new BitmapData(bitmap.width, bitmap.height, true, 0x00000000);
 			texture.draw(bitmap, WMatrix.toMatrix(WMatrix.identity()));
 			
 			halfSize = new Vector2(bitmap.width * 0.5, bitmap.height * 0.5);
@@ -190,6 +190,16 @@ package
 			graphics.drawRect(transformedPos.x, transformedPos.y,
 				transformedHS.x, transformedHS.y);
 			graphics.endFill();
+			
+			if (keyActive)
+			{
+				transformedPos = Vector2.transform(
+					position, viewMatrix);
+				
+				graphics.beginFill(0x00FF40, 0.5);
+				graphics.drawCircle(transformedPos.x, transformedPos.y, halfSize.x * 2);
+				graphics.endFill();
+			}
 		}
 		
 		override public function unload():void 

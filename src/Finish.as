@@ -8,6 +8,7 @@ package
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Graphics;
+	import screens.TestScreen;
 	import whojooEngine.Camera;
 	import whojooEngine.components.PhysicsComponent;
 	import whojooEngine.gameScreenManager.PlayScreen;
@@ -23,7 +24,7 @@ package
 	 */
 	public class Finish extends PhysicsComponent 
 	{
-		private const DistancePunishmentMargeInPercentage:Number = 110;
+		private const DistancePunishmentMargeInPercentage:Number = 115;
 		private const Radius:Number = 50;
 		
 		//Variable for UserExperience.
@@ -206,7 +207,8 @@ package
 			if (deltaX * deltaX + deltaY * deltaY < radiiSQ)
 			{
 				//Add a win screen.
-				throw new Error("We won, now add that in the code!");
+				Settings.getInstance().getManager().removeScreen(Settings.getInstance().getActiveScreen());
+				Settings.getInstance().getManager().addScreen(new TestScreen());
 			}
 		}
 		
@@ -236,7 +238,7 @@ package
 				return;
 			}
 			
-			graphics.beginFill(0xff0000, 1);
+			graphics.beginFill(0x804000, 0.3);
 			graphics.drawCircle(transformedPos.x + halfSize.x, transformedPos.y + halfSize.y,
 				Vector2.subtract(keys[currentKey].position, position).length() * DistancePunishmentMargeInPercentage * 0.01);
 			graphics.endFill();
@@ -270,6 +272,16 @@ package
 			var actualDistnaceInPixels:Number = rawDistanceInPixels - (halfSize.x + player.radius);
 			
 			return actualDistnaceInPixels / Settings.getInstance().getPixelPerMeter();
+		}
+
+		public function getKeysLeft():Number
+		{
+			return currentKey;
+		}
+
+		public function getCurrentKeyPosition():Vector2
+		{
+			return position;
 		}
 	}
 

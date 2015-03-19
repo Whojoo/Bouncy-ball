@@ -18,14 +18,18 @@ package
 	{
 		private const Vertices:int = 4;
 		
+		public var active:Boolean;
+		
 		public function Door(topLeft:Vector2, halfSize:Vector2) 
 		{
 			super(topLeft, halfSize);
+			active = true;
 		}
 		
 		public function switchDoor():void
 		{
 			//Switch the values to their opposite.
+			active = !active;
 			supressDraw = !supressDraw;
 			body.GetFixtureList().SetSensor(!body.GetFixtureList().IsSensor());
 		}

@@ -24,7 +24,7 @@ package
 	{
 		//Constant movement variables.
 		private const moveVec:Vector2 = new Vector2(0.025, 0);
-		private const jumpVec:Vector2 = new Vector2(0, -0.3);
+		private const jumpVec:Vector2 = new Vector2(0, -0.6);
 		
 		//Jump constants.
 		private const AmountOfFreeJumps:Number = 1;
@@ -42,6 +42,7 @@ package
 		private var jumpsFromOrbLeft:Number;
 		private var jumpsLeft:Number;
 		private var orbs:Vector.<Orb>;
+		private var jumped:Boolean;
 		
 		//Movement.
 		private var movementMultiplier:Number;
@@ -57,6 +58,7 @@ package
 			jumpsFromOrbLeft = 0;
 			jumpsLeft = 5;
 			orbs = new Vector.<Orb>();
+			jumped = false;
 			
 			movementMultiplier = OnFloorMultiplier;
 		}
@@ -86,7 +88,7 @@ package
 					//Still got some orbs left.
 					else
 					{
-						var temp:Vector.<Orb> = orbs;
+						var temp:Vector.<Orb> = new Vector.<Orb>();
 						
 						for (var i:int = 1; i < orbs.length; i++)
 						{
@@ -136,6 +138,23 @@ package
 			//jumpsFromOrbLeft might have been adjusted, adjust jumpsLeft.
 			jumpsLeft += jumpsFromOrbLeft;
 		}
+
+		override public function move(velocity:Vector2):void
+		{
+			if (!body.IsAwake())
+			{
+				body.SetAwake(true);
+			}
+
+			var currentVel:Vector2 = new Vector2();
+			currentVel.from_b2Vec2(body.GetLinearVelocity());
+
+			currentVel.y = jumped ? jumpVec.y * Settings.getInstance().getPixelPerMeter() : currentVel.y;
+
+			var correctedVel:Vector2 = Vector2.add(currentVel, velocity);
+
+			body.SetLinearVelocity(correctedVel.as_b2Vec2());
+		}
 		
 		override public function update(elapsedTime:Number):void 
 		{
@@ -150,6 +169,12 @@ package
 				if (floor && floor.position.y - floor.halfSize.y > 
 					position.y + halfSize.y)
 				{
+					var door:Door = floor as Door;
+					if (door && !door.active)
+					{
+						break;
+					}
+					
 					//Get free jumps.
 					jumpsLeft = amountOfOrbJumpsLeft() + AmountOfFreeJumps;
 					
@@ -161,16 +186,14 @@ package
 				}
 			}
 			
+			jumped = false;
+
 			//Input check.
 			var movementVector:Vector2 = new Vector2();
 			if (doJump.check(Settings.getInstance().getGame().input))
 			{
 				//Jump mechanics + check if we can jump.
-				if (jump())
-				{
-					movementVector.incrementBy(Vector2.multiply(
-						jumpVec, Settings.getInstance().getPixelPerMeter()));
-				}
+				jumped = jump();
 			}
 			
 			if (moveRight.check(Settings.getInstance().getGame().input))
@@ -205,6 +228,11 @@ package
 				transformedPosition.y,
 				scaledradius);
 			graphics.endFill();
+		}
+
+		public function getJumpsLeft():Number
+		{
+			return jumpsLeft;
 		}
 	}
 

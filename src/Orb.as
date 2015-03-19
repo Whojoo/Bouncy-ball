@@ -6,6 +6,7 @@ package
 	import Box2D.Dynamics.b2FixtureDef;
 	import Box2D.Dynamics.Contacts.b2ContactEdge;
 	import flash.display.Graphics;
+	import ui.OrbGainedHuD;
 	import whojooEngine.Camera;
 	import whojooEngine.components.GameComponent;
 	import whojooEngine.components.PhysicsComponent;
@@ -62,6 +63,12 @@ package
 			{
 				player.gainOrbEmpower(this, orbPowerLeftAtPlayer != 0);
 				orbPowerLeftAtPlayer = SettingsJumper.getInstance().getJumpCountPerOrb();
+				
+				var transformedPos:Vector2 = Vector2.transform(position,
+					Camera.getInstance().view);
+				
+				Settings.getInstance().getActiveScreen().hudComponents.addComponent(
+					new OrbGainedHuD(transformedPos, new Vector2(250, 525)));
 			}
 		}
 		
